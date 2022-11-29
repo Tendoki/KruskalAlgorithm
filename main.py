@@ -17,14 +17,19 @@ class Graph:
            return self.vertices
 
      def generateGraph(self, number_of_additional_edges):
-         free = []
-         selected = []
+         free = [] # свободные вершины
+         selected = [] # выбранные вершины
+
+         # добавление вершин в множество свободных
          for i in range(self.vertices):
              free.append(i)
 
+         # выбираем одну вершину рандомно и добавляем в выбранные
          first_node = free[random.randint(0, len(free) - 1)]
          free.remove(first_node)
          selected.append(first_node)
+
+         # запускаем цикл, который генерирует рандомное дерево со всеми вершинами. Кол-во ребер = n-1
          while free:
              node_from_free = free[random.randint(0, len(free) - 1)]
              node_from_selected = selected[random.randint(0, len(selected) - 1)]
@@ -32,6 +37,7 @@ class Graph:
              selected.append(node_from_free)
              self.add_edge(node_from_free, node_from_selected, randint(1, 10))
 
+         #добавляем указанное кол-во дополнительных ребер рандомно, чтобы сделать более сложную структуру графа
          for i in range(number_of_additional_edges):
              is_new_edge = False
              while not is_new_edge:
@@ -44,6 +50,16 @@ class Graph:
                          is_new_edge = False
                          break
              self.add_edge(first_node, second_node, randint(1, 5))
+
+     def kruskal(self):
+         forest = []
+         graph.sort_edges()
+         disjoint_set = DisjointSet(graph.number_of_vertices())
+         for (u, v, weight) in graph.get_edges():
+             if disjoint_set.find(u) != disjoint_set.find(v):
+                 forest.append((u, v, weight))
+                 disjoint_set.union(u, v)
+         return forest
 
 class DisjointSet:
     def __init__(self, size):
@@ -68,28 +84,18 @@ class DisjointSet:
             self.parent[v_root] = u_root
             self.rank[u_root] += 1
 
-def kruskal(graph):
-    forest = []
-    graph.sort_edges()
-    disjoint_set = DisjointSet(graph.number_of_vertices())
-    for (u, v, weight) in graph.get_edges():
-        if disjoint_set.find(u) != disjoint_set.find(v):
-            forest.append((u, v, weight))
-            disjoint_set.union(u, v)
-    return forest
-
 
 if __name__ == '__main__':
-    n = 1000
+    n = 250
     # number_of_additional_edges = randint(n - 1, (n - 2)*(n - 1)/2)
-    number_of_additional_edges = n - 1
+    number_of_additional_edges = n + 1
     factor = 1
-    for i in range(5):
+    for i in range(7):
         graph = Graph(n * factor)
         graph.generateGraph(number_of_additional_edges * factor - (factor - 1))
 
         begin = time.perf_counter()
-        forest = kruskal(graph)
+        forest = graph.kruskal()
         end = time.perf_counter()
         print(f"Вычисление заняло {end - begin:0.4f} секунд")
         print('Количество ребер: ', len(graph.edges))
